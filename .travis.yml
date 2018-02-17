@@ -1,0 +1,3 @@
+language: swift
+xcode_project: AchanCache.xcodeproj
+xcode_scheme: AchanCachePackageTests

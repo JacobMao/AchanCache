@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		4632BB0B2038556000027344 /* MemoryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4632BB0A2038556000027344 /* MemoryCache.swift */; };
 		OBJ_21 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_27 /* AchanCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* AchanCacheTests.swift */; };
 		OBJ_29 /* AchanCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "AchanCache::AchanCache::Product" /* AchanCache.framework */; };
@@ -45,6 +46,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4632BB0A2038556000027344 /* MemoryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryCache.swift; sourceTree = "<group>"; };
 		"AchanCache::AchanCache::Product" /* AchanCache.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AchanCache.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"AchanCache::AchanCacheTests::Product" /* AchanCacheTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = AchanCacheTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_12 /* AchanCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchanCacheTests.swift; sourceTree = "<group>"; };
@@ -120,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* AchanCache.swift */,
+				4632BB0A2038556000027344 /* MemoryCache.swift */,
 			);
 			name = AchanCache;
 			path = Sources/AchanCache;
@@ -225,6 +228,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_36 /* AchanCache.swift in Sources */,
+				4632BB0B2038556000027344 /* MemoryCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -308,11 +312,12 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				ENABLE_NS_ASSERTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_SWIFT_FLAGS = "-DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SWIFT_PACKAGE;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -373,10 +378,11 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GCC_OPTIMIZATION_LEVEL = s;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				OTHER_SWIFT_FLAGS = "-DXcode";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SWIFT_PACKAGE;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
