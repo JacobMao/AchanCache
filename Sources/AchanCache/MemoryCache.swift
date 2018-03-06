@@ -6,7 +6,7 @@
 //
 //  The MIT License (MIT)
 //
-//  Copyright (c) 2017 Jacob Mao.
+//  Copyright (c) 2018 Jacob Mao.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -65,8 +65,12 @@ private class ListNode<K: Hashable, V> {
     var time: TimeInterval = 0
     
     let key: K
-    let value: V
-    
+    var value: V
+
+    var memoryAddress: UnsafeMutableRawPointer {
+        return Unmanaged<AnyObject>.passUnretained(self as AnyObject).toOpaque()
+    }
+
     init(key: K, value: V) {
         self.key = key
         self.value = value
@@ -284,7 +288,29 @@ public extension MemoryCache {
 
     func setObject(_ object: V, forKey key: K, withCost cost: UInt = 0) {
         _threadSafetyCall {
-            
+            let now = CACurrentMediaTime()
+
+            if let node = _lruHandler.dic[key] {
+                if node.cost != cost {
+                    _lruHandler.totalCost -= node.cost
+                    _lruHandler.totalCost += cost
+
+                    node.cost = cost
+                }
+
+                node.time = now
+                node.value = object
+
+                _lruHandler.bringNode(toHead: node)
+            } else {
+                let newNode = ListNode(key: key, value: object)
+                newNode.cost = cost
+                newNode.time = now
+
+                _lruHandler.insertNode(newNode)
+            }
+
+            // TODO: maybe need to trim immediately
         }
     }
 
@@ -297,7 +323,8 @@ public extension MemoryCache {
             _lruHandler.removeNode(node)
 
             releaseObjects(shouldReleaseOnMainQueue: _lruHandler.shouldReleaseOnMainQueue,
-                           shouldAsynchronouslyRelease: _lruHandler.shouldAsynchronouslyRelease, releaseBlock: {
+                           shouldAsynchronouslyRelease: _lruHandler.shouldAsynchronouslyRelease,
+                           releaseBlock: {
                             let _ = node.cost
             })
         }
@@ -307,12 +334,25 @@ public extension MemoryCache {
         _threadSafetyCall{ _lruHandler.removeAll() }
     }
 
-    func trimToCount(_ count: UInt) {
-        if count == 0 {
-            removeAllObjects()
-        } else {
-            _trimToCount(count)
+    func trimToCount(_ countLimit: UInt) {
+        _trimWith(removeAllCondition: countLimit == 0, finishedCondition: _lruHandler.dic.count <= countLimit)
+    }
+    
+    func trimToCost(_ costLimit: UInt) {
+        _trimWith(removeAllCondition: costLimit == 0, finishedCondition: _lruHandler.totalCost <= costLimit)
+    }
+    
+    func trimToLifeCycle(_ lifeCycle: TimeInterval) {
+        let now = CACurrentMediaTime()
+        let finishedBlock : () -> Bool = {
+            guard let tailNode = self._lruHandler.tailNode else {
+                return true
+            }
+            
+            return now - tailNode.time <= lifeCycle
         }
+        
+        _trimWith(removeAllCondition: lifeCycle <= 0, finishedCondition: finishedBlock())
     }
 }
 
@@ -344,27 +384,6 @@ private extension MemoryCache {
         _locker.signal()
 
         return ret
-    }
-
-    func _trimToCount(_ countLimit: UInt) {
-        _trimWith(removeAllCondition: countLimit == 0, finishedCondition: _lruHandler.dic.count <= countLimit)
-    }
-
-    func _trimToCost(_ costLimit: UInt) {
-        _trimWith(removeAllCondition: costLimit == 0, finishedCondition: _lruHandler.totalCost <= costLimit)
-    }
-
-    func _trimToLifeCycle(_ lifeCycle: TimeInterval) {
-        let now = CACurrentMediaTime()
-        let finishedBlock : () -> Bool = {
-            guard let tailNode = self._lruHandler.tailNode else {
-                return true
-            }
-
-            return now - tailNode.time <= lifeCycle
-        }
-
-        _trimWith(removeAllCondition: lifeCycle <= 0, finishedCondition: finishedBlock())
     }
 
     func _trimWith(removeAllCondition: @autoclosure () -> Bool, finishedCondition: @autoclosure () -> Bool) {
@@ -421,9 +440,9 @@ private extension MemoryCache {
 
     func _trimInBackground() {
         _trimQueue.async {
-            self._trimToCost(self.maxCost)
-            self._trimToCount(self.maxCount)
-            self._trimToLifeCycle(self.maxLifeTime)
+            self.trimToCost(self.maxCost)
+            self.trimToCount(self.maxCount)
+            self.trimToLifeCycle(self.maxLifeTime)
         }
     }
 }
